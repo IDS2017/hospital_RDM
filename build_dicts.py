@@ -3,7 +3,6 @@ import pandas as pd
 
 # 1. read the original data & split into training and target data
 diabetic_data = pd.read_csv('data/diabetic_data.csv').drop('encounter_id', 1)
-target_data = pd.read_csv('data/diabetic_data.csv')['readmitted']
 meta = {'total_instances':diabetic_data.shape[0], 'used_cols':{}}
 
 # 2. device Numerical and Categorical columns
