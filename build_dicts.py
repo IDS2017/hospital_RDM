@@ -33,19 +33,25 @@ for col_name in num_data.columns:
 
 # 5. set information whether the column value is numeric or categorical
 for col_name in diabetic_data.columns:
+    cnt_table = diabetic_data[col_name].value_counts()
+    if '?' in cnt_table.index:
+        meta['used_cols'][col_name]['missing_cnt'] = cnt_table['?']
     if col_name in num_data.columns:
         meta['used_cols'][col_name]['data_type'] = 'numeric'
     else:
         meta['used_cols'][col_name]['data_type'] = 'categorical'
 
+# 6. set information for last column 'target'
+#meta['used_cols']['readmitted']['data_type'] = 'target'
+#idx = 0
+#for unique_val in target_data.index[0].unique():
+#    meta['used_cols'][col_name] = {}
+#    meta['used_cols'][col_name]['cate_idx'] = {}
+#    meta['used_cols'][col_name]['cate_idx'][unique_val] = idx
+#    idx = idx + 1
 
 print(meta)
-    #print(col_name, ':', unique)
-    #if col_name.contains('id') |
-    #if col_type_dict.has_key('Categorical'):
-    #    col_type_dict['Categorical']
 
-
-# finally, write meta to a file
+# 7. finally, write meta to a file
 with open('dicts/data.pickle', 'wb') as f:
     pk.dump(meta, f, pk.HIGHEST_PROTOCOL)
