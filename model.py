@@ -2,15 +2,35 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 from sklearn import preprocessing
-from sklearn.svm import SVC, LinearSVC
-from sklearn.svm import NuSVC
+from sklearn.svm import SVC, LinearSVC, NuSVC
 from sklearn import linear_model, datasets
 from sklearn.datasets import make_hastie_10_2
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import cross_val_score
 from matplotlib.lines import Line2D
 
+from sklearn.model_selection import GridSearchCV
+from sklearn.metrics import confusion_matrix
 
+model_list = {
+"L1_Logistic_Regression": linear_model.LogisticRegression(solver=liblinear),
+"L2_Logistic_Regression": linear_model.LogisticRegression(solver=lbfgs),
+"Random_Forest": RandomForestClassifier(),
+"LinearSVM": LinearSVC(),
+"NuSVM": NuSVC(decision_function_shape='ovo')
+}
+
+params_list = {
+"L1_Logistic_Regression": {'C': [10**i for i in range(-5,5)]},
+"L2_Logistic_Regression":  {'C': [10**i for i in range(-5,5)]},
+"Random_Forest": ,
+"LinearSVM": ,
+"NuSVM":
+}
+
+def grid_search(X, Y, m, cs, K):
+    clf = GridSearchCV(m, cs, cv=K)
+    clf.fit(X,Y)
+    return clf.cv_results_['mean_test_score']
 
 def L1logisticReg(X,Y):
     score = {}
@@ -70,8 +90,30 @@ def NuSVM(X, Y):
         i+=1
     return score
 
+def run_all_models(X_train, Y_train, X_test, Y_test):
+
+    scores = {}
+    for m in model_list:
+        scores[m].append(grid_search(X, Y, model_list[m], params_list[m], K))
+
+    max_score = 0
+    optimal_model = None
+    optimal_params = None
+    for model_name, score in scores.iteritmes():
+        if np.max(score) > max_score:
+            max_score = np.max(score)
+            param_key, param_val = params_list[model_name]
+            optimal_params = { param_key: param_val[np.argmax(score)]
+            optimal_model = model_list[model_name]
+
+    optimal_model.set_params(**optimal_params)
+    optimal_model.fit(X_train, Y_train)
+    Y_pred = optimal_model.predict(X_test)
+    optimal_model.confusion_matrix(Y_test, Y_pred)
+
 
 def printAll(X,Y):
+
     LR1_model = L1logisticReg(Xtrain, Ytrain)
     LR2_model = L2logisticReg(Xtrain, Ytrain)
     RF_model = randomForest(Xtrain, Ytrain)
