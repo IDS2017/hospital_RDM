@@ -1,8 +1,9 @@
 import pickle as pk
 import pandas as pd
 
-# 1. read the original data
+# 1. read the original data & split into training and target data
 diabetic_data = pd.read_csv('data/diabetic_data.csv').drop('encounter_id', 1)
+target_data = pd.read_csv('data/diabetic_data.csv')['readmitted']
 meta = {'total_instances':diabetic_data.shape[0], 'used_cols':{}}
 
 # 2. device Numerical and Categorical columns
@@ -17,10 +18,14 @@ for col_name in cate_data.columns:
     meta['used_cols'][col_name] = dict(diabetic_data[col_name].describe())
     meta['used_cols'][col_name]['categories'] = []
     meta['used_cols'][col_name]['cate_cnt'] = {}
+    meta['used_cols'][col_name]['cate_idx'] = {}
+    idx = 0
     for unique_val in diabetic_data[col_name].unique():
         if 'diag_' not in col_name:
             meta['used_cols'][col_name]['categories'].append(unique_val)
             meta['used_cols'][col_name]['cate_cnt'][unique_val] = diabetic_data[col_name].value_counts()[unique_val]
+            meta['used_cols'][col_name]['cate_idx'][unique_val] = idx
+            idx = idx + 1
 
 # 4. get information from Numerical columns
 for col_name in num_data.columns:
