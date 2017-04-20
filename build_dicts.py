@@ -40,18 +40,11 @@ for col_name in diabetic_data.columns:
         meta['used_cols'][col_name]['data_type'] = 'numeric'
     else:
         meta['used_cols'][col_name]['data_type'] = 'categorical'
-
-# 6. set information for last column 'target'
-#meta['used_cols']['readmitted']['data_type'] = 'target'
-#idx = 0
-#for unique_val in target_data.index[0].unique():
-#    meta['used_cols'][col_name] = {}
-#    meta['used_cols'][col_name]['cate_idx'] = {}
-#    meta['used_cols'][col_name]['cate_idx'][unique_val] = idx
-#    idx = idx + 1
+    if col_name == 'readmitted':
+        meta['used_cols'][col_name]['data_type'] = 'target'
 
 print(meta)
 
-# 7. finally, write meta to a file
+# 6. finally, write meta to a file
 with open('dicts/data.pickle', 'wb') as f:
     pk.dump(meta, f, pk.HIGHEST_PROTOCOL)
