@@ -1,6 +1,5 @@
 import pickle
 
-
 def main():
     # Parameter settings
     K = 5
@@ -24,9 +23,6 @@ def main():
     # Build Model (with whole data)
 
     # Evaluation
-
-    print "Train Error =", train_err
-    print "Test Error =", test_err
 
 if __name__ == "__main__":
     main()

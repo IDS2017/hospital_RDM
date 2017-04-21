@@ -20,11 +20,10 @@ for col_name in cate_data.columns:
     meta['used_cols'][col_name]['cate_idx'] = {}
     idx = 0
     for unique_val in diabetic_data[col_name].unique():
-        if 'diag_' not in col_name:
-            meta['used_cols'][col_name]['categories'].append(unique_val)
-            meta['used_cols'][col_name]['cate_cnt'][unique_val] = diabetic_data[col_name].value_counts()[unique_val]
-            meta['used_cols'][col_name]['cate_idx'][unique_val] = idx
-            idx = idx + 1
+        meta['used_cols'][col_name]['categories'].append(str(unique_val))
+        meta['used_cols'][col_name]['cate_cnt'][str(unique_val)] = diabetic_data[col_name].value_counts()[unique_val]
+        meta['used_cols'][col_name]['cate_idx'][str(unique_val)] = idx
+        idx = idx + 1
 
 # 4. get information from Numerical columns
 for col_name in num_data.columns:
@@ -45,5 +44,5 @@ for col_name in diabetic_data.columns:
 print(meta)
 
 # 6. finally, write meta to a file
-with open('dicts/data.pickle', 'wb') as f:
+with open('dicts/meta.p', 'wb') as f:
     pk.dump(meta, f, pk.HIGHEST_PROTOCOL)
