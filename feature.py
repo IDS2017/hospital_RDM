@@ -58,6 +58,8 @@ def feature():
                 col = cols[i]                                    # get column name
                 if col not in meta['used_cols']:
                     continue
+                if col == 'diag_1' or col == 'diag_2' or col == 'diag_3':
+                    continue
                 data_type = meta['used_cols'][col]['data_type']  # get column type
                 if data_type == 'categorical':
                     row.extend(get_cat(col, token[i]))
@@ -71,7 +73,8 @@ def feature():
     X = np.array(X)
     y = np.array(y)
     X, y = shuffle(X, y, random_state=0)
-
+    print (X.shape)
+    print (y.shape)
 
     # 3. Split data into train / test set
     # data[0]: X_train, y_train

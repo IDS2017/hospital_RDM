@@ -13,18 +13,18 @@ from sklearn.metrics import confusion_matrix
 
 model_list = {
     "L1_Logistic_Regression": linear_model.LogisticRegression(solver='liblinear'),
-    #"L2_Logistic_Regression": linear_model.LogisticRegression(solver='lbfgs'),
-    #"Random_Forest": RandomForestClassifier(),
-    #"LinearSVM": LinearSVC(),
-    # "NuSVM": NuSVC(decision_function_shape='ovo')
+    "L2_Logistic_Regression": linear_model.LogisticRegression(solver='lbfgs'),
+    "Random_Forest": RandomForestClassifier(),
+    "LinearSVM": LinearSVC(),
+    "NuSVM": NuSVC(decision_function_shape='ovo')
 }
 
 params_list = {
     "L1_Logistic_Regression": {'C': [10**i for i in range(-5,5)]},
-    # "L2_Logistic_Regression":  {'C': [10**i for i in range(-5,5)]},
-    #"Random_Forest": {'n_estimators': [10*i for i in range(1,10)]},
-    # "LinearSVM": {'C': [10**i for i in range(-5,5)]},
-    # "NuSVM": {'nu': np.arange(0.05,0.55,0.05)},
+    "L2_Logistic_Regression":  {'C': [10**i for i in range(-5,5)]},
+    "Random_Forest": {'n_estimators': [10*i for i in range(1,10)]},
+    "LinearSVM": {'C': [10**i for i in range(-5,5)]},
+    "NuSVM": {'nu': np.arange(0.05,0.55,0.05)},
 }
 
 
