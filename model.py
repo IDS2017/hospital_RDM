@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
+import time
 from sklearn import preprocessing
 from sklearn.svm import SVC, LinearSVC, NuSVC
 from sklearn import linear_model, datasets
@@ -77,7 +78,8 @@ def boxPlot(data):
 
     plt.xticks([0, 1, 2, 3, 4], data.keys())
     ax.set_xlim(-1,5)
-    plt.savefig('test.png')
+    fig_name = str(int(time.time())) + '.png'
+    plt.savefig(fig_name)
 
 
 if __name__ == "__main__":
