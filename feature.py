@@ -78,10 +78,11 @@ def feature():
     # data[1]: X_test, y_test
 
     N = int(0.8*meta['total_instances'])
-    data = [[X[:N, :], y[:N]], [X[N:, :], y[N:]]]
+    # data = []
 
-    with open("data/data.p", "wb") as f:
-        pickle.dump(data, f)
+    return X[:N, :], y[:N], X[N:, :], y[N:]
+    # with open("data/data.p", "wb") as f:
+        # pickle.dump(data, f)
 
 
 if __name__ == "__main__":
