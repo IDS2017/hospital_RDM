@@ -20,7 +20,7 @@ for col_name in cate_data.columns:
     meta['used_cols'][col_name]['cate_idx'] = {}
     idx = 0
     for unique_val in diabetic_data[col_name].unique():
-        if 'diag_' not in col_name:
+        #if 'diag_' not in col_name:
             meta['used_cols'][col_name]['categories'].append(unique_val)
             meta['used_cols'][col_name]['cate_cnt'][unique_val] = diabetic_data[col_name].value_counts()[unique_val]
             meta['used_cols'][col_name]['cate_idx'][unique_val] = idx
