@@ -16,7 +16,7 @@ model_list = {
     "L2_Logistic_Regression": linear_model.LogisticRegression(solver='lbfgs'),
     "Random_Forest": RandomForestClassifier(),
     "LinearSVM": LinearSVC(),
-    "NuSVM": NuSVC(decision_function_shape='ovo')
+    # "NuSVM": NuSVC(decision_function_shape='ovo')
 }
 
 params_list = {
@@ -24,13 +24,14 @@ params_list = {
     "L2_Logistic_Regression":  {'C': [10**i for i in range(-5,5)]},
     "Random_Forest": {'n_estimators': [10*i for i in range(1,10)]},
     "LinearSVM": {'C': [10**i for i in range(-5,5)]},
-    "NuSVM": {'nu': np.arange(0.05,0.55,0.05)},
+    # "NuSVM": {'nu': np.arange(0.05,0.55,0.05)}
 }
 
 
 def grid_search(X, Y, m, cs, K):
     clf = GridSearchCV(m, cs, cv=K)
     clf.fit(X,Y)
+    print clf.cv_results_
     return clf.cv_results_['mean_test_score']
 
 
@@ -40,6 +41,7 @@ def run_all_models(X_train, Y_train, X_test, Y_test, K=5):
         print ('run', m)
         scores[m] = grid_search(X_train, Y_train, model_list[m], params_list[m], K)
 
+    print (scores)
     max_score = 0
     for model_name, score in scores.items():
         if np.max(score) > max_score:
@@ -62,8 +64,8 @@ def run_all_models(X_train, Y_train, X_test, Y_test, K=5):
 def boxPlot(data):
 
     tmp = []
-    for key,value in data.items():
-        tmp.append(data[key])
+    for v in data.values():
+        tmp.append(v)
 
     fig = plt.figure()
     plt.figure(figsize=(10,6))
@@ -73,7 +75,7 @@ def boxPlot(data):
         ax.boxplot(tmp[i], positions = [i],widths = 0.35 ,showfliers=False, patch_artist=True)
         ax.set_title('Comparison of ML models accuracy', fontsize=20)
 
-    plt.xticks([0, 1, 2, 3, 4], ['L1 LR', 'L2 LR', 'RF', 'Linear SVM', 'NuSVM'])
+    plt.xticks([0, 1, 2, 3, 4], data.keys())
     ax.set_xlim(-1,5)
     plt.savefig('test.png')
 
