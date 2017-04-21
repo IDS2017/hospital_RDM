@@ -7,13 +7,14 @@ from sklearn import linear_model, datasets
 from sklearn.datasets import make_hastie_10_2
 from sklearn.ensemble import RandomForestClassifier
 from matplotlib.lines import Line2D
-
 from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import confusion_matrix
 
+
+
 model_list = {
-"L1_Logistic_Regression": linear_model.LogisticRegression(solver=liblinear),
-"L2_Logistic_Regression": linear_model.LogisticRegression(solver=lbfgs),
+"L1_Logistic_Regression": linear_model.LogisticRegression(solver='liblinear'),
+"L2_Logistic_Regression": linear_model.LogisticRegression(solver='lbfgs'),
 "Random_Forest": RandomForestClassifier(),
 "LinearSVM": LinearSVC(),
 "NuSVM": NuSVC(decision_function_shape='ovo')
@@ -22,10 +23,11 @@ model_list = {
 params_list = {
 "L1_Logistic_Regression": {'C': [10**i for i in range(-5,5)]},
 "L2_Logistic_Regression":  {'C': [10**i for i in range(-5,5)]},
-"Random_Forest": ,
-"LinearSVM": ,
-"NuSVM":
+"Random_Forest": {'n_estimators': [10*i for i in range(1,10)]},
+"LinearSVM": {'C': [10**i for i in range(-5,5)]},
+"NuSVM": {'nu': np.arange(0.05,0.55,0.05)},
 }
+
 
 def grid_search(X, Y, m, cs, K):
     clf = GridSearchCV(m, cs, cv=K)
@@ -90,27 +92,27 @@ def NuSVM(X, Y):
         i+=1
     return score
 
-def run_all_models(X_train, Y_train, X_test, Y_test):
+def run_all_models(X_train, Y_train, X_test, Y_test, K=5):
 
     scores = {}
     for m in model_list:
-        scores[m].append(grid_search(X, Y, model_list[m], params_list[m], K))
+        scores[m] = grid_search(X_train, Y_train, model_list[m], params_list[m], K)
 
+    # scores = {"L1_Logistic_Regression": [0,1,2,3,4,5,6]}
     max_score = 0
-    optimal_model = None
-    optimal_params = None
-    for model_name, score in scores.iteritmes():
+    for model_name, score in scores.items():
         if np.max(score) > max_score:
             max_score = np.max(score)
-            param_key, param_val = params_list[model_name]
-            optimal_params = { param_key: param_val[np.argmax(score)]
+            param_key = list(params_list[model_name])[0]
+            optimal_params = { param_key: params_list[model_name][param_key][np.argmax(score)]}
             optimal_model = model_list[model_name]
 
     optimal_model.set_params(**optimal_params)
     optimal_model.fit(X_train, Y_train)
     Y_pred = optimal_model.predict(X_test)
-    optimal_model.confusion_matrix(Y_test, Y_pred)
+    confusion_matrix(Y_test, Y_pred)
 
+    return scores
 
 def printAll(X,Y):
 
@@ -130,3 +132,27 @@ def printAll(X,Y):
     print(SVM_model)
     print("NuSVM: ")
     print(NuSVM_model)
+
+def boxPlot(data):
+
+    tmp = []
+    for key,value in data.items():
+        tmp.append(data[key])
+
+    fig = plt.figure()
+    plt.figure(figsize=(10,6))
+
+    ax = plt.subplot(111)
+    for i in range(len(tmp)):
+        ax.boxplot(tmp[i], positions = [i],widths = 0.35 ,showfliers=False, patch_artist=True)
+        ax.set_title('Comparison of ML models accuracy', fontsize=20)
+
+    plt.xticks([0, 1, 2, 3, 4], ['L1 LR','L2 LR', 'RF', 'Linear SVM', 'NuSVM'])
+    ax.set_xlim(-1,5)
+    plt.savefig('test.png')
+
+
+
+plotScore = run_all_models(Xtrain, Ytrain, Xtest, Ytest)
+boxPlot(plotScore)
+plt.show()
