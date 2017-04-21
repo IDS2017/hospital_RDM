@@ -14,7 +14,7 @@ def main():
     # Load data
     # with open("data/data.p", "r") as f:
         # data = pickle.load(f)
-    X_train, y_train, X_test, y_test = feature()
+    X_train, Y_train, X_test, Y_test = feature()
 
     # X_train, y_train = data[0]
     # X_test, y_test = data[1]

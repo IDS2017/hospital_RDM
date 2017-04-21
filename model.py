@@ -53,7 +53,7 @@ def run_all_models(X_train, Y_train, X_test, Y_test, K=5):
     Y_pred = optimal_model.predict(X_test)
 
     # Evaluation
-    confusion_matrix(Y_test, Y_pred)
+    print confusion_matrix(Y_test, Y_pred)
 
     return scores
 
