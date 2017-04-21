@@ -13,18 +13,18 @@ from sklearn.metrics import confusion_matrix
 
 model_list = {
     "L1_Logistic_Regression": linear_model.LogisticRegression(solver='liblinear'),
-    "L2_Logistic_Regression": linear_model.LogisticRegression(solver='lbfgs'),
-    "Random_Forest": RandomForestClassifier(),
-    "LinearSVM": LinearSVC(),
-    "NuSVM": NuSVC(decision_function_shape='ovo')
+    #"L2_Logistic_Regression": linear_model.LogisticRegression(solver='lbfgs'),
+    #"Random_Forest": RandomForestClassifier(),
+    #"LinearSVM": LinearSVC(),
+    # "NuSVM": NuSVC(decision_function_shape='ovo')
 }
 
 params_list = {
     "L1_Logistic_Regression": {'C': [10**i for i in range(-5,5)]},
-    "L2_Logistic_Regression":  {'C': [10**i for i in range(-5,5)]},
-    "Random_Forest": {'n_estimators': [10*i for i in range(1,10)]},
-    "LinearSVM": {'C': [10**i for i in range(-5,5)]},
-    "NuSVM": {'nu': np.arange(0.05,0.55,0.05)},
+    # "L2_Logistic_Regression":  {'C': [10**i for i in range(-5,5)]},
+    #"Random_Forest": {'n_estimators': [10*i for i in range(1,10)]},
+    # "LinearSVM": {'C': [10**i for i in range(-5,5)]},
+    # "NuSVM": {'nu': np.arange(0.05,0.55,0.05)},
 }
 
 
@@ -37,6 +37,7 @@ def grid_search(X, Y, m, cs, K):
 def run_all_models(X_train, Y_train, X_test, Y_test, K=5):
     scores = {}
     for m in model_list:
+        print ('run', m)
         scores[m] = grid_search(X_train, Y_train, model_list[m], params_list[m], K)
 
     max_score = 0
@@ -53,7 +54,7 @@ def run_all_models(X_train, Y_train, X_test, Y_test, K=5):
     Y_pred = optimal_model.predict(X_test)
 
     # Evaluation
-    print confusion_matrix(Y_test, Y_pred)
+    print (confusion_matrix(Y_test, Y_pred))
 
     return scores
 

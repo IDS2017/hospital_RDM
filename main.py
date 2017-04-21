@@ -20,7 +20,7 @@ def main():
     # X_test, y_test = data[1]
 
     # Cross-Validation
-    print "Start training models with', K, '-fold cross validation..."
+    print ('Start training models with', K, '-fold cross validation...')
     plotScore = run_all_models(X_train, Y_train, X_test, Y_test, K)
     boxPlot(plotScore)
     plt.show()
