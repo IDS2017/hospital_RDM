@@ -31,7 +31,7 @@ params_list = {
 def grid_search(X, Y, m, cs, K):
     clf = GridSearchCV(m, cs, cv=K)
     clf.fit(X,Y)
-    print clf.cv_results_
+    print (clf.cv_results_)
     return clf.cv_results_['mean_test_score']
 
 
