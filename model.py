@@ -13,18 +13,18 @@ from sklearn.metrics import confusion_matrix
 
 
 model_list = {
-    "L1_Logistic_Regression": linear_model.LogisticRegression(solver='liblinear'),
-    "L2_Logistic_Regression": linear_model.LogisticRegression(solver='lbfgs'),
-    "Random_Forest": RandomForestClassifier(),
-    "LinearSVM": LinearSVC(),
+    # "L1_Logistic_Regression": linear_model.LogisticRegression(solver='liblinear'),
+    # "L2_Logistic_Regression": linear_model.LogisticRegression(solver='lbfgs'),
+    "Random_Forest": RandomForestClassifier('oob_score'=True),
+    # "LinearSVM": LinearSVC(),
     # "NuSVM": NuSVC(decision_function_shape='ovo')
 }
 
 params_list = {
-    "L1_Logistic_Regression": {'C': [10**i for i in range(-5,5)]},
-    "L2_Logistic_Regression":  {'C': [10**i for i in range(-5,5)]},
-    "Random_Forest": {'n_estimators': [10*i for i in range(1,10)]},
-    "LinearSVM": {'C': [10**i for i in range(-5,5)]},
+    # "L1_Logistic_Regression": {'C': [10**i for i in range(-5,5)]},
+    # "L2_Logistic_Regression":  {'C': [10**i for i in range(-5,5)]},
+    "Random_Forest": {'n_estimators': [50], 'max_depth': range(20,25), 'min_samples_leaf': [2**i for i in range(10,14)]},
+    # "LinearSVM": {'C': [10**i for i in range(-5,5)]},
     # "NuSVM": {'nu': np.arange(0.05,0.55,0.05)}
 }
 
@@ -73,13 +73,15 @@ def boxPlot(data):
 
     ax = plt.subplot(111)
     for i in range(len(tmp)):
-        ax.boxplot(tmp[i], positions = [i],widths = 0.35 ,showfliers=False, patch_artist=True)
+        # ax.boxplot(tmp[i], positions = [i],widths = 0.35 ,showfliers=False, patch_artist=True)
+        ax.boxplot(tmp[i], positions = [i],widths = 0.35, patch_artist=True)
         ax.set_title('Comparison of ML models accuracy', fontsize=20)
 
     plt.xticks([0, 1, 2, 3, 4], data.keys())
     ax.set_xlim(-1,5)
     fig_name = str(int(time.time())) + '.png'
     plt.savefig(fig_name)
+    plt.show()
 
 
 if __name__ == "__main__":
