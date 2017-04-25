@@ -47,3 +47,6 @@ print(meta)
 # 6. finally, write meta to a file
 with open('dicts/data.pickle', 'wb') as f:
     pk.dump(meta, f, pk.HIGHEST_PROTOCOL)
+
+
+

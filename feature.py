@@ -1,21 +1,40 @@
 import pickle
 from sklearn.utils import shuffle
 
-def get_cat(c, cate_idx):
-    c_vec = [0]*len(cate_idx)
-    c_vec[cate_idx[c]] = 1
+# 0. Load meta
+with open('dicts/meta.p', 'rb') as f:
+    meta = pickle.load(f)
+
+def get_cat(col_name, c):
+    # init vector
+    cate_idx = meta['used_cols'][col_name]['cate_idx']
+    c_vec = [0]*(len(cate_idx)+1)
+
+    # update vector
+    if c == '?': # is missing value
+        c_vec[-1] = 1
+    else:
+        c_vec[cate_idx[c]] = 1
 
     return c_vec
 
-def get_num(n):
-    return [n]
+def get_num(col_name, n):
+    # init vector
+    if meta['used_cols'][col_name]['missing_cnt']: # has missing value
+        n_vec = [0]*2
+    else:
+        n_vec = [0]
+
+    # update vector
+    if n == '?': # is missing value
+        n_vec[1] = 1
+        n_vec[0] = meta['used_cols'][col_name]['mean']
+    else:
+        n_vec[0] = float(n)
+
+    return n_vec
 
 def feature():
-
-    # 0. Load meta
-    with open('dicts/meta.p', 'rb') as f:
-        meta = pickle.load(f)
-
     # 1. Generating X, y
     X = []
     y = []
@@ -36,9 +55,9 @@ def feature():
                     continue
                 data_type = meta['used_cols'][col]['type']  # get column type
                 if data_type == 'categorical':
-                    row.extend(get_cat(token[i], meta[col]['cate_idx']))
+                    row.extend(get_cat(col, token[i]))
                 else if data_type == 'numerical':
-                    row.extend(get_num(token[i]))
+                    row.extend(get_num(col, token[i]))
                 else if data_type == 'target':
                     y.append(meta['used_cols'][col]['class_idx'][token[i]])
 
