@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import time
 from sklearn import preprocessing
-from sklearn.svm import SVC, LinearSVC, NuSVC
+from sklearn.svm import SVC, LinearSVC
 from sklearn import linear_model, datasets
 from sklearn.datasets import make_hastie_10_2
 from sklearn.ensemble import RandomForestClassifier
@@ -15,18 +15,18 @@ from sklearn.metrics import confusion_matrix
 model_list = {
     # "L1_Logistic_Regression": linear_model.LogisticRegression(solver='liblinear'),
     # "L2_Logistic_Regression": linear_model.LogisticRegression(solver='lbfgs'),
+    "RBF-SVM": SVC(kernel='rbf', decision_function_shape='ovr'),
     "Random_Forest": RandomForestClassifier(),
     # "LinearSVM": LinearSVC(),
-    # "NuSVM": NuSVC(decision_function_shape='ovo')
 }
 
 params_list = {
     # "L1_Logistic_Regression": {'C': [10**i for i in range(-5,5)]},
     # "L2_Logistic_Regression":  {'C': [10**i for i in range(-5,5)]},
-    "Random_Forest": {'n_estimators': [50], 'max_depth': range(20,25), 'oob_score': [True]},
+    "RBF-SVM": {'C': [10**i for i in range(-5,5)]},
+    "Random_Forest": {'n_estimators': [10], 'max_depth': [20,30], 'oob_score': [True]},
     # "Random_Forest": {'n_estimators': [50], 'max_depth': range(20,25), 'min_samples_leaf': [2**i for i in range(10,14)]},
     # "LinearSVM": {'C': [10**i for i in range(-5,5)]},
-    # "NuSVM": {'nu': np.arange(0.05,0.55,0.05)}
 }
 
 
@@ -69,24 +69,17 @@ def boxPlot(data):
     for v in data.values():
         tmp.append(v)
 
-    fig = plt.figure()
-    plt.figure(figsize=(10,6))
+    plt.figure(figsize=(10, 6))
 
     ax = plt.subplot(111)
     for i in range(len(tmp)):
         # ax.boxplot(tmp[i], positions = [i],widths = 0.35 ,showfliers=False, patch_artist=True)
-        ax.boxplot(tmp[i], positions = [i],widths = 0.35, patch_artist=True)
+        ax.boxplot(tmp[i], positions=[i], widths=0.35, patch_artist=True)
         ax.set_title('Comparison of ML models accuracy', fontsize=20)
 
-    plt.xticks([0, 1, 2, 3, 4], data.keys())
-    ax.set_xlim(-1,5)
+    plt.xticks(range(len(tmp)), data.keys())
+    ax.set_xlim(-1, len(tmp))
     fig_name = str(int(time.time())) + '.png'
     plt.savefig(fig_name)
     plt.show()
 
-
-if __name__ == "__main__":
-    K = 5
-    plotScore = run_all_models(Xtrain, Ytrain, Xtest, Ytest, K)
-    boxPlot(plotScore)
-    plt.show()
