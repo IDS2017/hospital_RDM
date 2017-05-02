@@ -119,4 +119,4 @@ def print_icd_code_index():
         if value.split('.')[0] == '250':
             print(value, ": ", get_ICD(value))
 
-print_icd_code_index()
+#print_icd_code_index()
