@@ -51,11 +51,11 @@ with open('dicts/data.pickle', 'wb') as f:
 
 
 
-def get_ICD(icd_code):
-    # icd_code_index = {0:(1,139), 1:(140,239), 2:(240,279), 3:(280,289), 4:(290,319), 5:(320,359),
-    #                  6:(360,389), 7:(390,459), 8:(460,519), 9:(520,579), 10:(580,629),
-    #                  11:(630, 679), 12:(680, 709), 13:(710, 739), 14:(740, 759), 15:(760, 779),
-    #                  16:(780, 799), 17:(800, 999), 18:('E', 'V')}
+def get_ICD(icd_code_original):
+    icd_code = icd_code_original.split('.')[0]
+    icd_code_detail = '-1'
+    is_diabete = False
+    DIABETE_CODE = '250'
     icd_code_index = [('1', '139'), ('140', '239'), ('240', '279'), ('280', '289'), ('290', '319'),
                       ('320', '359'), ('360', '389'), ('390', '459'), ('460', '519'), ('520', '579'),
                       ('580', '629'), ('630', '679'), ('680', '709'), ('710', '739'), ('740', '759'),
@@ -67,6 +67,11 @@ def get_ICD(icd_code):
         index = 1
     elif icd_code_index[2][0] <= icd_code <= icd_code_index[2][1]:
         index = 2
+        if icd_code == DIABETE_CODE:
+            is_diabete = True
+            if '.' in icd_code_original:
+                icd_code_detail = icd_code_original.split('.')[1][0]
+
     elif icd_code_index[3][0] <= icd_code <= icd_code_index[3][1]:
         index = 3
     elif icd_code_index[4][0] <= icd_code <= icd_code_index[4][1]:
@@ -102,11 +107,16 @@ def get_ICD(icd_code):
     elif icd_code_index[18][1] in icd_code:
         index = 18
     else:
-        index = 100
+        index = 19
 
-    return index
+    if (len(icd_code_detail) == 1) & (icd_code_detail != -1):
+        icd_code_detail = icd_code_detail + '0'
+
+    return index, is_diabete, icd_code_detail
 
 def print_icd_code_index():
     for value in diabetic_data.diag_1:
+        if value.split('.')[0] == '250':
             print(value, ": ", get_ICD(value))
 
+print_icd_code_index()
