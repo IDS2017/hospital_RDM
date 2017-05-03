@@ -55,6 +55,7 @@ def get_ICD(icd_code_original):
     icd_code = icd_code_original.split('.')[0]
     icd_code_detail = '-1'
     is_diabete = False
+    is_uncontrolled = False
     DIABETE_CODE = '250'
     icd_code_index = [('1', '139'), ('140', '239'), ('240', '279'), ('280', '289'), ('290', '319'),
                       ('320', '359'), ('360', '389'), ('390', '459'), ('460', '519'), ('520', '579'),
@@ -70,7 +71,20 @@ def get_ICD(icd_code_original):
         if icd_code == DIABETE_CODE:
             is_diabete = True
             if '.' in icd_code_original:
-                icd_code_detail = icd_code_original.split('.')[1][0]
+                icd_code_detail = icd_code_original.split('.')[1]
+                if len(icd_code_detail) == 2:
+                    if icd_code_detail[1] == '0':
+                        type = '1'
+                    elif icd_code_detail[1] == '1':
+                        type = '0'
+                    elif icd_code_detail[1] == '2':
+                        type = '1'
+                        is_uncontrolled = True
+                    elif icd_code_detail[1] == '3':
+                        type = '0'
+                        is_uncontrolled = True
+                else:
+                    type = '-1'
 
     elif icd_code_index[3][0] <= icd_code <= icd_code_index[3][1]:
         index = 3
@@ -109,14 +123,11 @@ def get_ICD(icd_code_original):
     else:
         index = 19
 
-    if (len(icd_code_detail) == 1) & (icd_code_detail != -1):
-        icd_code_detail = icd_code_detail + '0'
-
-    return index, is_diabete, icd_code_detail
+    return index, is_diabete, type, is_uncontrolled, icd_code_detail[0]
 
 def print_icd_code_index():
     for value in diabetic_data.diag_1:
         if value.split('.')[0] == '250':
             print(value, ": ", get_ICD(value))
 
-#print_icd_code_index()
+print_icd_code_index()
