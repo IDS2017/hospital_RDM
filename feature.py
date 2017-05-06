@@ -26,7 +26,7 @@ def get_cat(col_name, c):
         c_vec_2   is_diabete      : 0 (False), 1 (True)
         c_vec_3   which_type      : 0 (type1), 1 (type2), 2(not specified)
         c_vec_4   is_controlled   : 0 (False), 1 (True)
-        c_vec_5   ice_code_detail : 0-9
+        c_vec_5   icd_code_detail : 0-9
         '''
         index, is_diabete, which_type, is_controlled, icd_code_detail = get_ICD(c)
         c_vec_1[index] = 1
@@ -34,7 +34,7 @@ def get_cat(col_name, c):
             c_vec_2[is_diabete] = 1
             c_vec_3[which_type] = 1
             c_vec_4[is_controlled] = 1
-            c_vec_5[ice_code_detail] = 1
+            c_vec_5[icd_code_detail] = 1
         else:
             c_vec_2[is_diabete] = 1
 
