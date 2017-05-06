@@ -1,7 +1,8 @@
 from feature import feature
 from model import *
 
-from spark_sklearn.util import createLocalSparkSession
+from pyspark import SparkConf, SparkContext
+# from spark_sklearn.util import createLocalSparkSession
 
 
 def main():
