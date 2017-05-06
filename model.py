@@ -12,20 +12,20 @@ from sklearn.metrics import confusion_matrix
 
 
 model_list = {
-    # "L1_Logistic_Regression": linear_model.LogisticRegression(solver='liblinear'),
-    # "L2_Logistic_Regression": linear_model.LogisticRegression(solver='lbfgs'),
     "RBF-SVM": SVC(kernel='rbf', decision_function_shape='ovr'),
-    "Random_Forest": RandomForestClassifier(),
-    # "LinearSVM": LinearSVC(),
+    "L1_Logistic_Regression": linear_model.LogisticRegression(solver='liblinear'),
+    "L2_Logistic_Regression": linear_model.LogisticRegression(solver='lbfgs'),
+    # "Random_Forest": RandomForestClassifier(),
+    "LinearSVM": LinearSVC(),
 }
 
 params_list = {
-    # "L1_Logistic_Regression": {'C': [10**i for i in range(-5,5)]},
-    # "L2_Logistic_Regression":  {'C': [10**i for i in range(-5,5)]},
     "RBF-SVM": {'C': [10**i for i in range(-5,5)]},
-    "Random_Forest": {'n_estimators': [10], 'max_depth': [20,30], 'oob_score': [True]},
+    "L1_Logistic_Regression": {'C': [10**i for i in range(-5,5)]},
+    "L2_Logistic_Regression":  {'C': [10**i for i in range(-5,5)]},
+    # "Random_Forest": {'n_estimators': [10], 'max_depth': [20,30], 'oob_score': [True]},
     # "Random_Forest": {'n_estimators': [50], 'max_depth': range(20,25), 'min_samples_leaf': [2**i for i in range(10,14)]},
-    # "LinearSVM": {'C': [10**i for i in range(-5,5)]},
+    "LinearSVM": {'C': [10**i for i in range(-5,5)]},
 }
 
 
@@ -48,7 +48,7 @@ def run_all_models(sc, X_train, Y_train, X_test, Y_test, K=5):
         if np.max(score) > max_score:
             max_score = np.max(score)
             param_key = list(params_list[model_name])[0]
-            optimal_params = { param_key: params_list[model_name][param_key][np.argmax(score)]}
+            optimal_params = {param_key: params_list[model_name][param_key][np.argmax(score)]}
             optimal_model = model_list[model_name]
 
     # Build Model (with whole data)
