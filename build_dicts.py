@@ -37,6 +37,8 @@ for col_name in diabetic_data.columns:
     cnt_table = diabetic_data[col_name].value_counts()
     if '?' in cnt_table.index:
         meta['used_cols'][col_name]['missing_cnt'] = cnt_table['?']
+    else:
+        meta['used_cols'][col_name]['missing_cnt'] = 0
     if col_name in num_data.columns:
         meta['used_cols'][col_name]['data_type'] = 'numeric'
     else:
