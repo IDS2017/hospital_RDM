@@ -38,6 +38,8 @@ def get_cat(col_name, c):
         else:
             c_vec_2[is_diabete] = 1
 
+        c_vec = c_vec_1 + c_vec_2 + c_vec_3 + c_vec_4 + c_vec_5
+
     else:
         # init vector
         cate_idx = meta['used_cols'][col_name]['cate_idx']
