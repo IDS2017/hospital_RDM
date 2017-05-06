@@ -101,7 +101,7 @@ def feature():
                 data_type = meta['used_cols'][col]['data_type']  # get column type
                 if data_type == 'categorical':
                     row.extend(get_cat(col, token[i]))
-                elif data_type == 'numerical':
+                elif data_type == 'numeric':
                     row.extend(get_num(col, token[i]))
                 elif data_type == 'target':
                     t = meta['used_cols'][col]['cate_idx'][token[i]]

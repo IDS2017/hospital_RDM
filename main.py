@@ -11,16 +11,14 @@ def main():
     # Load data
     X_train, Y_train, X_test, Y_test = feature()
 
-    spark = createLocalSparkSession()
-    sc = spark.sparkContext
+    conf = SparkConf().setAppName("Readmission")
+    conf = conf.setMaster("local[4]")
+    sc = SparkContext(conf=conf)
 
     # Cross-Validation
     print ('Start training models with', K, '-fold cross validation...')
     plotScore = run_all_models(sc, X_train, Y_train, X_test, Y_test, K)
     # boxPlot(plotScore)
-
-    spark.stop()
-    SparkSession._instantiatedContext = None
 
 
 if __name__ == "__main__":
