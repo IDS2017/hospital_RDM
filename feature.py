@@ -28,7 +28,7 @@ def get_cat(col_name, c):
         c_vec_4   is_controlled   : 0 (False), 1 (True)
         c_vec_5   ice_code_detail : 0-9
         '''
-        index, is_diabete, which_type, is_uncontrolled, icd_code_detail = get_ICD(c)
+        index, is_diabete, which_type, is_controlled, icd_code_detail = get_ICD(c)
         c_vec_1[index] = 1
         if is_diabete:
             c_vec_2[is_diabete] = 1
