@@ -17,26 +17,26 @@ def get_cat(col_name, c):
     if 'diag_' in col_name:
         c_vec_1 = [0]*20
         c_vec_2 = [0]*2
-        c_vec_3 = [0]*2
+        c_vec_3 = [0]*3
         c_vec_4 = [0]*2
         c_vec_5 = [0]*10
 
         '''
-        c_vec_1   index : 0-19
-        c_vec_2   is_diabete : True, False
-        c_vec_3   which_type : 0(type1), 1(type2)
-        c_vec_4   is_controlled : True, False
+        c_vec_1   index           : 0-19
+        c_vec_2   is_diabete      : 1 (True), 0 (False)
+        c_vec_3   which_type      : 0 (type1), 1 (type2), 2(not specified)
+        c_vec_4   is_controlled   : 1 (True), 0 (False)
         c_vec_5   ice_code_detail : 0-9
         '''
         index, is_diabete, which_type, is_uncontrolled, icd_code_detail = get_ICD(c)
         c_vec_1[index] = 1
         if is_diabete:
-            c_vec_2[0] = 1
+            c_vec_2[is_diabete] = 1
             c_vec_3[which_type] = 1
             c_vec_4[is_controlled] = 1
             c_vec_5[ice_code_detail] = 1
         else:
-            c_vec_2[1] = 1
+            c_vec_2[is_diabete] = 1
 
     else:
         # init vector

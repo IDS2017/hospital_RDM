@@ -1,14 +1,13 @@
 import matplotlib.pyplot as plt
-import pandas as pd
 import numpy as np
 import time
-from sklearn import preprocessing
+
 from sklearn.svm import SVC, LinearSVC
 from sklearn import linear_model, datasets
-from sklearn.datasets import make_hastie_10_2
 from sklearn.ensemble import RandomForestClassifier
-from matplotlib.lines import Line2D
-from sklearn.model_selection import GridSearchCV
+
+from spark_sklearn import GridSearchCV
+# from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import confusion_matrix
 
 
@@ -30,18 +29,18 @@ params_list = {
 }
 
 
-def grid_search(X, Y, m, cs, K):
-    clf = GridSearchCV(m, cs, cv=K)
+def grid_search(sc, X, Y, m, cs, K):
+    clf = GridSearchCV(sc, m, cs, cv=K)
     clf.fit(X,Y)
     print (clf.cv_results_)
     return clf.cv_results_['mean_test_score']
 
 
-def run_all_models(X_train, Y_train, X_test, Y_test, K=5):
+def run_all_models(sc, X_train, Y_train, X_test, Y_test, K=5):
     scores = {}
     for m in model_list:
         print ('run', m)
-        scores[m] = grid_search(X_train, Y_train, model_list[m], params_list[m], K)
+        scores[m] = grid_search(sc, X_train, Y_train, model_list[m], params_list[m], K)
 
     print (scores)
     max_score = 0
