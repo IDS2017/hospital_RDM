@@ -21,11 +21,12 @@ for col_name in cate_data.columns:
     meta['used_cols'][col_name]['cate_idx'] = {}
     idx = 0
     for unique_val in diabetic_data[col_name].unique():
-        if 'diag_' not in col_name:
-            meta['used_cols'][col_name]['categories'].append(str(unique_val))
-            meta['used_cols'][col_name]['cate_cnt'][str(unique_val)] = diabetic_data[col_name].value_counts()[unique_val]
-            meta['used_cols'][col_name]['cate_idx'][str(unique_val)] = idx
-            idx = idx + 1
+        if 'diag_' in col_name or unique_val == 'None':
+            continue
+        meta['used_cols'][col_name]['categories'].append(str(unique_val))
+        meta['used_cols'][col_name]['cate_cnt'][str(unique_val)] = diabetic_data[col_name].value_counts()[unique_val]
+        meta['used_cols'][col_name]['cate_idx'][str(unique_val)] = idx
+        idx = idx + 1
 
 # 4. get information from Numerical columns
 for col_name in num_data.columns:

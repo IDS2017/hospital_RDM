@@ -1,29 +1,43 @@
 import pickle
 import csv
 import numpy as np
+from build_dicts import get_ICD
 from sklearn.utils import shuffle
 
 # 0. Load meta
 with open('dicts/meta.p', 'rb') as f:
     meta = pickle.load(f)
 
+con_cat = { 'max_glu_serum': ['>200', '>300'],  \
+            'A1Cresult': ['>7', '>8'],  \
+            'age': ['[0-10)','[10-20)','[20-30)','[30-40)','[40-50)','[50-60)','[60-70)','[70-80)','[80-90)','[90-100)']
+}
 
 def get_cat(col_name, c):
-
     if 'diag_' in col_name:
-        c_vec = [0]*20
+        c_vec = [0]*20  # 20 first-level
+        # index, is_diabete, icd_code_detail = get_ICD(c)
         c_vec[get_ICD(c)] = 1
 
     else:
         # init vector
         cate_idx = meta['used_cols'][col_name]['cate_idx']
-        c_vec = [0]*(len(cate_idx)+1)
+        c_vec = [0]*(len(cate_idx)+1)  # unseen category
 
         # update vector
-        if c == '?': # is missing value
-            c_vec[-1] = 1
+        if col_name in con_cat:
+            if c == 'None':  # not measured
+                c_vec[-1] = 1
+            else:
+                for val in con_cat[col_name]:
+                    if c != val:
+                        c_vec[cate_idx[val]] = 1
+
         else:
-            c_vec[cate_idx[c]] = 1
+            if c == '?':  # is missing value
+                c_vec[-1] = 1
+            else:
+                c_vec[cate_idx[c]] = 1
 
     return c_vec
 
@@ -46,10 +60,6 @@ def get_num(col_name, n):
 
 def get_ICD(icd_code):
     icd_code = icd_code.split('.')[0]
-    # icd_code_index = {0:(1,139), 1:(140,239), 2:(240,279), 3:(280,289), 4:(290,319), 5:(320,359),
-    #                  6:(360,389), 7:(390,459), 8:(460,519), 9:(520,579), 10:(580,629),
-    #                  11:(630, 679), 12:(680, 709), 13:(710, 739), 14:(740, 759), 15:(760, 779),
-    #                  16:(780, 799), 17:(800, 999), 18:('E', 'V')}
     icd_code_index = [('1', '139'), ('140', '239'), ('240', '279'), ('280', '289'), ('290', '319'),
                       ('320', '359'), ('360', '389'), ('390', '459'), ('460', '519'), ('520', '579'),
                       ('580', '629'), ('630', '679'), ('680', '709'), ('710', '739'), ('740', '759'),
@@ -65,7 +75,6 @@ def get_ICD(icd_code):
         index = 19
 
     return index
-
 
 def feature():
     # 1. Generating X, y
