@@ -55,8 +55,8 @@ with open('dicts/meta.p', 'wb') as f:
 def get_ICD(icd_code_original):
     icd_code = icd_code_original.split('.')[0]
     icd_code_detail = '-1'
-    is_diabete = False
-    is_uncontrolled = False
+    is_diabete = '0'
+    is_uncontrolled = '0'
     DIABETE_CODE = '250'
     icd_code_index = [('1', '139'), ('140', '239'), ('240', '279'), ('280', '289'), ('290', '319'),
                       ('320', '359'), ('360', '389'), ('390', '459'), ('460', '519'), ('520', '579'),
@@ -70,7 +70,7 @@ def get_ICD(icd_code_original):
     elif icd_code_index[2][0] <= icd_code <= icd_code_index[2][1]:
         index = 2
         if icd_code == DIABETE_CODE:
-            is_diabete = True
+            is_diabete = '1'
             if '.' in icd_code_original:
                 icd_code_detail = icd_code_original.split('.')[1]
                 if len(icd_code_detail) == 2:
@@ -80,10 +80,10 @@ def get_ICD(icd_code_original):
                         type = '0'
                     elif icd_code_detail[1] == '2':
                         type = '1'
-                        is_uncontrolled = True
+                        is_uncontrolled = '1'
                     elif icd_code_detail[1] == '3':
                         type = '0'
-                        is_uncontrolled = True
+                        is_uncontrolled = '1'
                 else:
                     type = '-1'
 
