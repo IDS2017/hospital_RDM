@@ -21,10 +21,11 @@ for col_name in cate_data.columns:
     meta['used_cols'][col_name]['cate_idx'] = {}
     idx = 0
     for unique_val in diabetic_data[col_name].unique():
-        # if 'diag_' not in col_name:
-        meta['used_cols'][col_name]['categories'].append(unique_val)
-        meta['used_cols'][col_name]['cate_cnt'][unique_val] = diabetic_data[col_name].value_counts()[unique_val]
-        meta['used_cols'][col_name]['cate_idx'][unique_val] = idx
+        if 'diag_' in col_name or unique_val == 'None':
+            continue
+        meta['used_cols'][col_name]['categories'].append(str(unique_val))
+        meta['used_cols'][col_name]['cate_cnt'][str(unique_val)] = diabetic_data[col_name].value_counts()[unique_val]
+        meta['used_cols'][col_name]['cate_idx'][str(unique_val)] = idx
         idx = idx + 1
 
 # 4. get information from Numerical columns
@@ -43,12 +44,12 @@ for col_name in diabetic_data.columns:
     if col_name == 'readmitted':
         meta['used_cols'][col_name]['data_type'] = 'target'
 
+
 #print(meta)
 
 # 6. finally, write meta to a file
-with open('dicts/data.pickle', 'wb') as f:
+with open('dicts/meta.p', 'wb') as f:
     pk.dump(meta, f, pk.HIGHEST_PROTOCOL)
-
 
 
 def get_ICD(icd_code_original):
@@ -130,4 +131,7 @@ def print_icd_code_index():
         if value.split('.')[0] == '250':
             print(value, ": ", get_ICD(value))
 
-print_icd_code_index()
+
+if __name__ == "__main__":
+    print_icd_code_index()
+    get_ICD
