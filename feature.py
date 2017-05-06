@@ -77,24 +77,6 @@ def get_num(col_name, n):
 
     return n_vec
 
-def get_ICD(icd_code):
-    icd_code = icd_code.split('.')[0]
-    icd_code_index = [('1', '139'), ('140', '239'), ('240', '279'), ('280', '289'), ('290', '319'),
-                      ('320', '359'), ('360', '389'), ('390', '459'), ('460', '519'), ('520', '579'),
-                      ('580', '629'), ('630', '679'), ('680', '709'), ('710', '739'), ('740', '759'),
-                      ('760', '779'), ('780', '799'), ('800', '999')]
-    index = -1
-    for i in range(len(icd_code_index)):
-        if 'E' in icd_code or 'V' in icd_code:
-            index = 18
-        if icd_code_index[i][0] <= icd_code <= icd_code_index[i][1]:
-            index = i
-            break;
-    if index == -1:
-        index = 19
-
-    return index
-
 def feature():
     # 1. Generating X, y
     X = []

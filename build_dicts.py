@@ -133,5 +133,5 @@ def print_icd_code_index():
 
 
 if __name__ == "__main__":
-    print_icd_code_index()
-    get_ICD
+    # print_icd_code_index()
+    index, is_diabete, which_type, is_uncontrolled, icd_code_detail = get_ICD('250.3')
