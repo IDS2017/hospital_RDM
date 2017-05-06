@@ -8,7 +8,7 @@ from sklearn.ensemble import RandomForestClassifier
 
 from spark_sklearn import GridSearchCV
 # from sklearn.model_selection import GridSearchCV
-from sklearn.metrics import confusion_matrix
+from sklearn.metrics import confusion_matrix, roc_auc_score, cohen_kappa_score, make_scorer
 
 
 model_list = {
@@ -30,7 +30,8 @@ params_list = {
 
 
 def grid_search(sc, X, Y, m, cs, K):
-    clf = GridSearchCV(sc, m, cs, cv=K)
+    kappa_scorer = make_scorer(cohen_kappa_score)
+    clf = GridSearchCV(sc, m, cs, cv=K, scoring=kappa_scorer)
     clf.fit(X,Y)
     print (clf.cv_results_)
     return clf.cv_results_['mean_test_score']
@@ -57,7 +58,9 @@ def run_all_models(sc, X_train, Y_train, X_test, Y_test, K=5):
     Y_pred = optimal_model.predict(X_test)
 
     # Evaluation
-    print (confusion_matrix(Y_test, Y_pred))
+    print ('confusion_matrix', confusion_matrix(Y_test, Y_pred))
+    print ('roc_auc_score', roc_auc_score(Y_test, Y_pred))
+    print ('cohen_kappa_score', cohen_kappa_score(Y_test, Y_pred))
 
     return scores
 

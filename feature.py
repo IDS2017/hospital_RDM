@@ -120,7 +120,11 @@ def feature():
                 elif data_type == 'numerical':
                     row.extend(get_num(col, token[i]))
                 elif data_type == 'target':
-                    y.append(meta['used_cols'][col]['cate_idx'][token[i]])
+                    t = meta['used_cols'][col]['cate_idx'][token[i]]
+                    if t < 2:  # NO, >30
+                        y.append(0)
+                    else:      # < 30
+                        y.append(1)
             X.append(row)
 
 
