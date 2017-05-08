@@ -6,17 +6,17 @@ from sklearn.svm import SVC, LinearSVC
 from sklearn import linear_model, datasets
 from sklearn.ensemble import RandomForestClassifier
 
-from spark_sklearn import GridSearchCV
-# from sklearn.model_selection import GridSearchCV
+from spark_sklearn import GridSearchCV as SPGridSearchCV
+from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import confusion_matrix, roc_auc_score, cohen_kappa_score, make_scorer
 
 
 model_list = {
-    "RBF-SVM": SVC(kernel='rbf', decision_function_shape='ovr'),
-    "L1_Logistic_Regression": linear_model.LogisticRegression(solver='liblinear'),
-    "L2_Logistic_Regression": linear_model.LogisticRegression(solver='lbfgs'),
-    # "Random_Forest": RandomForestClassifier(),
-    "LinearSVM": LinearSVC(),
+    "RBF-SVM": SVC(kernel='rbf', decision_function_shape='ovr', class_weight='balanced'),
+    "L1_Logistic_Regression": linear_model.LogisticRegression(solver='liblinear', class_weight='balanced'),
+    "L2_Logistic_Regression": linear_model.LogisticRegression(solver='lbfgs', class_weight='balanced'),
+    # "Random_Forest": RandomForestClassifier(class_weight='balanced'),
+    "LinearSVM": LinearSVC(class_weight='balanced'),
 }
 
 params_list = {
@@ -31,7 +31,7 @@ params_list = {
 
 def grid_search(sc, X, Y, m, cs, K):
     kappa_scorer = make_scorer(cohen_kappa_score)
-    clf = GridSearchCV(sc, m, cs, cv=K, scoring=kappa_scorer)
+    clf = SPGridSearchCV(sc, m, cs, cv=K, scoring=kappa_scorer)
     clf.fit(X,Y)
     print (clf.cv_results_)
     return clf.cv_results_['mean_test_score']

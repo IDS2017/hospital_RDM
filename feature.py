@@ -8,8 +8,9 @@ from sklearn.utils import shuffle
 with open('dicts/meta.p', 'rb') as f:
     meta = pickle.load(f)
 
-con_cat = { 'max_glu_serum': ['>200', '>300'],  \
-            'A1Cresult': ['>7', '>8'],  \
+mask = ['max_glu_serum', 'A1Cresult']
+con_cat = { 'max_glu_serum': ['Norm', '>200', '>300'],  \
+            'A1Cresult': ['Norm', '>7', '>8'],  \
             'age': ['[0-10)','[10-20)','[20-30)','[30-40)','[40-50)','[50-60)','[60-70)','[70-80)','[80-90)','[90-100)']
 }
 
@@ -21,44 +22,72 @@ def get_cat(col_name, c):
         c_vec_4 = [0]*2
         c_vec_5 = [0]*10
 
-        '''
-        c_vec_1   index           : 0-19
-        c_vec_2   is_diabete      : 0 (False), 1 (True)
-        c_vec_3   which_type      : 0 (type1), 1 (type2), 2(not specified)
-        c_vec_4   is_controlled   : 0 (False), 1 (True)
-        c_vec_5   icd_code_detail : 0-9
-        '''
-        index, is_diabete, which_type, is_controlled, icd_code_detail = get_ICD(c)
-        c_vec_1[index] = 1
-        if is_diabete:
-            c_vec_2[is_diabete] = 1
-            c_vec_3[which_type] = 1
-            c_vec_4[is_controlled] = 1
-            c_vec_5[icd_code_detail] = 1
+        if meta['used_cols'][col_name]['missing_cnt']:
+            c_vec_6 = [0]
+
+        if c != '?':
+            '''
+            c_vec_1   index           : 0-19
+            c_vec_2   is_diabete      : 0 (False), 1 (True)
+            c_vec_3   which_type      : 0 (type1), 1 (type2), 2(not specified)
+            c_vec_4   is_controlled   : 0 (False), 1 (True)
+            c_vec_5   icd_code_detail : 0-9
+            '''
+            index, is_diabete, which_type, is_controlled, icd_code_detail = get_ICD(c)
+            c_vec_1[index] = 1
+            if is_diabete:
+                c_vec_2[is_diabete] = 1
+                c_vec_3[which_type] = 1
+                c_vec_4[is_controlled] = 1
+                c_vec_5[icd_code_detail] = 1
+            else:
+                c_vec_2[is_diabete] = 1
         else:
-            c_vec_2[is_diabete] = 1
+            c_vec_6[0] = 1
 
-        c_vec = c_vec_1 + c_vec_2 + c_vec_3 + c_vec_4 + c_vec_5
+        if meta['used_cols'][col_name]['missing_cnt']:
+            c_vec = c_vec_1 + c_vec_2 + c_vec_3 + c_vec_4 + c_vec_5 + c_vec_6
+        else:
+            c_vec = c_vec_1 + c_vec_2 + c_vec_3 + c_vec_4 + c_vec_5
 
-    else:
+    elif col_name in mask:
         # init vector
         cate_idx = meta['used_cols'][col_name]['cate_idx']
-        c_vec = [0]*(len(cate_idx)+1)  # unseen category
+        if meta['used_cols'][col_name]['missing_cnt']:
+            c_vec = [0]*(len(cate_idx)+2)  # mask + missing
+        else:
+            c_vec = [0]*(len(cate_idx)+1)  # mask
 
         # update vector
-        if col_name in con_cat:
-            if c == 'None':  # not measured
+        if c != '?':
+            if c == 'None':
                 c_vec[-1] = 1
             else:
                 for val in con_cat[col_name]:
                     if c != val:
                         c_vec[cate_idx[val]] = 1
-
         else:
-            if c == '?':  # is missing value
-                c_vec[-1] = 1
-            else:
-                c_vec[cate_idx[c]] = 1
+            c_vec[-2] = 1
+
+    else:
+        # init vector
+        cate_idx = meta['used_cols'][col_name]['cate_idx']
+        if meta['used_cols'][col_name]['missing_cnt']:
+            c_vec = [0]*(len(cate_idx)+1)  # missing
+        else:
+            c_vec = [0]*len(cate_idx)
+
+        # update vector
+        if c != '?':
+            if c in cate_idx:
+                if col_name in con_cat:
+                    for val in con_cat[col_name]:
+                        if c != val:
+                            c_vec[cate_idx[val]] = 1
+                else:
+                    c_vec[cate_idx[c]] = 1
+        else:
+            c_vec[-1] = 1
 
     return c_vec
 
@@ -100,8 +129,10 @@ def feature():
                     continue
                 data_type = meta['used_cols'][col]['data_type']  # get column type
                 if data_type == 'categorical':
+                    print (col, len(get_cat(col, token[i])))
                     row.extend(get_cat(col, token[i]))
                 elif data_type == 'numeric':
+                    print (col, len(get_num(col, token[i])))
                     row.extend(get_num(col, token[i]))
                 elif data_type == 'target':
                     t = meta['used_cols'][col]['cate_idx'][token[i]]
@@ -109,6 +140,7 @@ def feature():
                         y.append(0)
                     else:      # < 30
                         y.append(1)
+            print ('---------------')
             X.append(row)
 
 
