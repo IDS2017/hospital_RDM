@@ -1,7 +1,8 @@
 import pickle
 from model import *
 # from PCA import *
-from plot import *
+
+# from logistic import *
 
 
 def main():
@@ -15,6 +16,10 @@ def main():
         X_train, Y_train = pickle.load(f)
     with open("data/test.p", "rb") as f:
         X_test, Y_test = pickle.load(f)
+
+    # drop weight
+    X_train = np.delete(X_train, [i for i in range(19,29)], axis=1)
+    X_test = np.delete(X_test, [i for i in range(19,29)], axis=1)
 
     if use_spark:
         from pyspark import SparkConf, SparkContext

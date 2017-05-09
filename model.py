@@ -1,3 +1,5 @@
+from settings import *
+
 from sklearn.svm import SVC, LinearSVC
 from sklearn import linear_model
 from sklearn.ensemble import RandomForestClassifier
@@ -34,20 +36,42 @@ def run_all_models(sc, X_train, Y_train, X_test, Y_test, K=5, all_roc=True):
 
     print (scores)
     if sc is None:  # sklearn
+        pass
     else:           # sklearn on spark
+        if all_roc:
+            optimal_param = {}
+            for model_name, param_score in scores.items():
+                max_score = 0
+                for param, score in param_score:
+                    if score > max_score:
+                        max_score = score
+                        optimal_param[model_name] = param
+            for m in optimal_param:
+                print (m)
+                optimal_model = model_list[m]
+                optimal_params = optimal_param[m]
 
-    if all_roc:
-        optimal_param = {}
-        for model_name, param_score in scores.items():
+                # Build Model (with whole data)
+                optimal_model.set_params(**optimal_params)
+                print ('optimal_settings', optimal_model)
+                optimal_model.fit(X_train, Y_train)
+                Y_pred = optimal_model.predict(X_test)
+
+                # Evaluation
+                roc_auc = roc_auc_score(Y_test, Y_pred)
+                print ('confusion_matrix', confusion_matrix(Y_test, Y_pred))
+                print ('roc_auc_score', roc_auc)
+                print ('cohen_kappa_score', cohen_kappa_score(Y_test, Y_pred))
+                utils.dump(Y_test, "drop_Y_test_%s" % (m))
+                utils.dump(Y_pred, "drop_Y_pred_%s" % (m))
+        else:
             max_score = 0
-            for param, score in param_score:
-                if score > max_score:
-                    max_score = score
-                    optimal_param[model_name] = param
-        for m in optimal_param:
-            print (m)
-            optimal_model = model_list[m]
-            optimal_params = optimal_param[m]
+            for model_name, param_score in scores.items():
+               for param, score in param_score:
+                   if score > max_score:
+                       max_score = score
+                       optimal_params = param
+                       optimal_model = model_list[model_name]
 
             # Build Model (with whole data)
             optimal_model.set_params(**optimal_params)
@@ -56,31 +80,9 @@ def run_all_models(sc, X_train, Y_train, X_test, Y_test, K=5, all_roc=True):
             Y_pred = optimal_model.predict(X_test)
 
             # Evaluation
-            roc_auc = roc_auc_score(Y_test, Y_pred)
             print ('confusion_matrix', confusion_matrix(Y_test, Y_pred))
-            print ('roc_auc_score', roc_auc)
+            print ('roc_auc_score', roc_auc_score(Y_test, Y_pred))
             print ('cohen_kappa_score', cohen_kappa_score(Y_test, Y_pred))
-            utils.dump(Y_test, "Y_test_%s" % (m))
-            utils.dump(Y_pred, "Y_pred_%s" % (m))
-    else:
-        max_score = 0
-        for model_name, param_score in scores.items():
-           for param, score in param_score:
-               if score > max_score:
-                   max_score = score
-                   optimal_params = param
-                   optimal_model = model_list[model_name]
-
-        # Build Model (with whole data)
-        optimal_model.set_params(**optimal_params)
-        print ('optimal_settings', optimal_model)
-        optimal_model.fit(X_train, Y_train)
-        Y_pred = optimal_model.predict(X_test)
-
-        # Evaluation
-        print ('confusion_matrix', confusion_matrix(Y_test, Y_pred))
-        print ('roc_auc_score', roc_auc_score(Y_test, Y_pred))
-        print ('cohen_kappa_score', cohen_kappa_score(Y_test, Y_pred))
 
     return scores
 

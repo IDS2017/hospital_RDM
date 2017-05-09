@@ -1,4 +1,5 @@
-# import matplotlib.pyplot as plt
+import pickle
+import matplotlib.pyplot as plt
 
 # def boxPlot(data):
 
@@ -19,3 +20,17 @@
 #     fig_name = str(int(time.time())) + '.png'
 #     plt.savefig(fig_name)
 #     plt.show()
+
+def plotAUC():
+    with open("scores.p", "rb") as f:
+        scores = pickle.load(f)
+    cs = [i for i in range(-5,5)]
+    for m in scores:
+        ss = [v2 for v1,v2 in scores[m]]
+        plt.plot(cs, ss, label='%s' % (m))
+    plt.xlim(cs)
+    plt.ylim([0, 1])
+    plt.xlabel('log10(C)')
+    plt.ylabel('AUC')
+    plt.legend(loc="lower right")
+    plt.show()
