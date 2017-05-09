@@ -8,6 +8,8 @@ from sklearn.utils import shuffle
 with open('dicts/meta.p', 'rb') as f:
     meta = pickle.load(f)
 
+hospitalFeature = ['num_lab_procedures', 'num_procedures', 'num_medications', 'number_outpatient', 'number_emergency', 'number_inpatient']
+
 con_cat = { 'max_glu_serum': ['>200', '>300'],  \
             'A1Cresult': ['>7', '>8'],  \
             'age': ['[0-10)','[10-20)','[20-30)','[30-40)','[40-50)','[50-60)','[60-70)','[70-80)','[80-90)','[90-100)']
@@ -63,7 +65,7 @@ def get_cat(col_name, c):
     return c_vec
 
 
-def get_num(col_name, n):
+def get_num(col_name, n, time):
     # init vector
     if meta['used_cols'][col_name]['missing_cnt']:  # has missing value
         n_vec = [0]*2
@@ -74,6 +76,8 @@ def get_num(col_name, n):
     if n == '?':  # is missing value
         n_vec[1] = 1
         n_vec[0] = meta['used_cols'][col_name]['mean']
+    if col_name in hospitalFeature:
+        n_vec[0] = float(n)/ float(time)
     else:
         n_vec[0] = float(n)
 
@@ -94,30 +98,38 @@ def feature():
                 header = False
                 continue
             row = []
+            time = 1;
+            print (cols)
             for i in range(len(token)):
                 col = cols[i]                                    # get column name
+                if col == 'time_in_hospital':
+                    time = token[i]
                 if col not in meta['used_cols']:
                     continue
                 data_type = meta['used_cols'][col]['data_type']  # get column type
                 if data_type == 'categorical':
                     row.extend(get_cat(col, token[i]))
                 elif data_type == 'numeric':
-                    row.extend(get_num(col, token[i]))
+                    row.extend(get_num(col, token[i], time))
                 elif data_type == 'target':
                     t = meta['used_cols'][col]['cate_idx'][token[i]]
                     if t < 2:  # NO, >30
                         y.append(0)
                     else:      # < 30
                         y.append(1)
+                #if (col=='medical_specialty'):
+                #    print (time, token[i], get_num(col, token[i], time))
             X.append(row)
 
 
     # 2. Shuffle
     X = np.array(X)
     y = np.array(y)
+
     X, y = shuffle(X, y, random_state=0)
     print (X.shape)
     print (y.shape)
+
 
     # 3. Split data into train / test set
     # data[0]: X_train, y_train
