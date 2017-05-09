@@ -129,10 +129,8 @@ def feature():
                     continue
                 data_type = meta['used_cols'][col]['data_type']  # get column type
                 if data_type == 'categorical':
-                    print (col, len(get_cat(col, token[i])))
                     row.extend(get_cat(col, token[i]))
                 elif data_type == 'numeric':
-                    print (col, len(get_num(col, token[i])))
                     row.extend(get_num(col, token[i]))
                 elif data_type == 'target':
                     t = meta['used_cols'][col]['cate_idx'][token[i]]
@@ -140,7 +138,6 @@ def feature():
                         y.append(0)
                     else:      # < 30
                         y.append(1)
-            print ('---------------')
             X.append(row)
 
 
@@ -152,15 +149,16 @@ def feature():
     print (y.shape)
 
     # 3. Split data into train / test set
-    # data[0]: X_train, y_train
-    # data[1]: X_test, y_test
+    # train.p : X_train, y_train
+    # test.p  : X_test, y_test
 
     N = int(0.8*meta['total_instances'])
-    # data = []
 
-    return X[:N, :], y[:N], X[N:, :], y[N:]
-    # with open("data/data.p", "wb") as f:
-        # pickle.dump(data, f)
+    # return X[:N, :], y[:N], X[N:, :], y[N:]
+    with open("data/train.p", "wb") as f:
+        pickle.dump((X[:N, :], y[:N]), f)
+    with open("data/test.p", "wb") as f:
+        pickle.dump((X[N:, :], y[N:]), f)
 
 
 if __name__ == "__main__":
