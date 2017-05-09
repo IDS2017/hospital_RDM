@@ -1,29 +1,93 @@
 import pickle
 import csv
 import numpy as np
+from build_dicts import get_ICD
 from sklearn.utils import shuffle
 
 # 0. Load meta
 with open('dicts/meta.p', 'rb') as f:
     meta = pickle.load(f)
 
+mask = ['max_glu_serum', 'A1Cresult']
+con_cat = { 'max_glu_serum': ['Norm', '>200', '>300'],  \
+            'A1Cresult': ['Norm', '>7', '>8'],  \
+            'age': ['[0-10)','[10-20)','[20-30)','[30-40)','[40-50)','[50-60)','[60-70)','[70-80)','[80-90)','[90-100)']
+}
 
 def get_cat(col_name, c):
-
     if 'diag_' in col_name:
-        c_vec = [0]*20
-        c_vec[get_ICD(c)] = 1
+        c_vec_1 = [0]*20
+        c_vec_2 = [0]*2
+        c_vec_3 = [0]*3
+        c_vec_4 = [0]*2
+        c_vec_5 = [0]*10
+
+        if meta['used_cols'][col_name]['missing_cnt']:
+            c_vec_6 = [0]
+
+        if c != '?':
+            '''
+            c_vec_1   index           : 0-19
+            c_vec_2   is_diabete      : 0 (False), 1 (True)
+            c_vec_3   which_type      : 0 (type1), 1 (type2), 2(not specified)
+            c_vec_4   is_controlled   : 0 (False), 1 (True)
+            c_vec_5   icd_code_detail : 0-9
+            '''
+            index, is_diabete, which_type, is_controlled, icd_code_detail = get_ICD(c)
+            c_vec_1[index] = 1
+            if is_diabete:
+                c_vec_2[is_diabete] = 1
+                c_vec_3[which_type] = 1
+                c_vec_4[is_controlled] = 1
+                c_vec_5[icd_code_detail] = 1
+            else:
+                c_vec_2[is_diabete] = 1
+        else:
+            c_vec_6[0] = 1
+
+        if meta['used_cols'][col_name]['missing_cnt']:
+            c_vec = c_vec_1 + c_vec_2 + c_vec_3 + c_vec_4 + c_vec_5 + c_vec_6
+        else:
+            c_vec = c_vec_1 + c_vec_2 + c_vec_3 + c_vec_4 + c_vec_5
+
+    elif col_name in mask:
+        # init vector
+        cate_idx = meta['used_cols'][col_name]['cate_idx']
+        if meta['used_cols'][col_name]['missing_cnt']:
+            c_vec = [0]*(len(cate_idx)+2)  # mask + missing
+        else:
+            c_vec = [0]*(len(cate_idx)+1)  # mask
+
+        # update vector
+        if c != '?':
+            if c == 'None':
+                c_vec[-1] = 1
+            else:
+                for val in con_cat[col_name]:
+                    if c != val:
+                        c_vec[cate_idx[val]] = 1
+        else:
+            c_vec[-2] = 1
 
     else:
         # init vector
         cate_idx = meta['used_cols'][col_name]['cate_idx']
-        c_vec = [0]*(len(cate_idx)+1)
+        if meta['used_cols'][col_name]['missing_cnt']:
+            c_vec = [0]*(len(cate_idx)+1)  # missing
+        else:
+            c_vec = [0]*len(cate_idx)
 
         # update vector
-        if c == '?': # is missing value
-            c_vec[-1] = 1
+        if c != '?':
+            if c in cate_idx:
+                if col_name in con_cat:
+                    for val in con_cat[col_name]:
+                        if c != val:
+                            c_vec[cate_idx[val]] = 1
+                else:
+                    c_vec[cate_idx[c]] = 1
         else:
-            c_vec[cate_idx[c]] = 1
+            c_vec[-1] = 1
 
     return c_vec
 
@@ -43,29 +107,6 @@ def get_num(col_name, n):
         n_vec[0] = float(n)
 
     return n_vec
-
-def get_ICD(icd_code):
-    icd_code = icd_code.split('.')[0]
-    # icd_code_index = {0:(1,139), 1:(140,239), 2:(240,279), 3:(280,289), 4:(290,319), 5:(320,359),
-    #                  6:(360,389), 7:(390,459), 8:(460,519), 9:(520,579), 10:(580,629),
-    #                  11:(630, 679), 12:(680, 709), 13:(710, 739), 14:(740, 759), 15:(760, 779),
-    #                  16:(780, 799), 17:(800, 999), 18:('E', 'V')}
-    icd_code_index = [('1', '139'), ('140', '239'), ('240', '279'), ('280', '289'), ('290', '319'),
-                      ('320', '359'), ('360', '389'), ('390', '459'), ('460', '519'), ('520', '579'),
-                      ('580', '629'), ('630', '679'), ('680', '709'), ('710', '739'), ('740', '759'),
-                      ('760', '779'), ('780', '799'), ('800', '999')]
-    index = -1
-    for i in range(len(icd_code_index)):
-        if 'E' in icd_code or 'V' in icd_code:
-            index = 18
-        if icd_code_index[i][0] <= icd_code <= icd_code_index[i][1]:
-            index = i
-            break;
-    if index == -1:
-        index = 19
-
-    return index
-
 
 def feature():
     # 1. Generating X, y
@@ -89,10 +130,14 @@ def feature():
                 data_type = meta['used_cols'][col]['data_type']  # get column type
                 if data_type == 'categorical':
                     row.extend(get_cat(col, token[i]))
-                elif data_type == 'numerical':
+                elif data_type == 'numeric':
                     row.extend(get_num(col, token[i]))
                 elif data_type == 'target':
-                    y.append(meta['used_cols'][col]['cate_idx'][token[i]])
+                    t = meta['used_cols'][col]['cate_idx'][token[i]]
+                    if t < 2:  # NO, >30
+                        y.append(0)
+                    else:      # < 30
+                        y.append(1)
             X.append(row)
 
 
@@ -104,15 +149,16 @@ def feature():
     print (y.shape)
 
     # 3. Split data into train / test set
-    # data[0]: X_train, y_train
-    # data[1]: X_test, y_test
+    # train.p : X_train, y_train
+    # test.p  : X_test, y_test
 
     N = int(0.8*meta['total_instances'])
-    # data = []
 
-    return X[:N, :], y[:N], X[N:, :], y[N:]
-    # with open("data/data.p", "wb") as f:
-        # pickle.dump(data, f)
+    # return X[:N, :], y[:N], X[N:, :], y[N:]
+    with open("data/train.p", "wb") as f:
+        pickle.dump((X[:N, :], y[:N]), f)
+    with open("data/test.p", "wb") as f:
+        pickle.dump((X[N:, :], y[N:]), f)
 
 
 if __name__ == "__main__":

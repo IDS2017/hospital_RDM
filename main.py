@@ -1,30 +1,34 @@
 import pickle
-from feature import feature
-from model import run_all_models, boxPlot
+from model import *
+# from PCA import *
+from plot import *
 
 
 def main():
     # Parameter settings
     K = 5
-
-    # Initialization
-    train_err = 0
-    test_err = 0
+    use_spark = True
+    all_roc = True
 
     # Load data
-    # with open("data/data.p", "r") as f:
-        # data = pickle.load(f)
-    X_train, Y_train, X_test, Y_test = feature()
+    with open("data/train.p", "rb") as f:
+        X_train, Y_train = pickle.load(f)
+    with open("data/test.p", "rb") as f:
+        X_test, Y_test = pickle.load(f)
 
-    # X_train, y_train = data[0]
-    # X_test, y_test = data[1]
+    if use_spark:
+        from pyspark import SparkConf, SparkContext
+        conf = SparkConf().setAppName("Readmission")
+        conf = conf.setMaster("local[4]")
+        sc = SparkContext(conf=conf)
+    else:
+        sc = None
 
     # Cross-Validation
     print ('Start training models with', K, '-fold cross validation...')
-    plotScore = run_all_models(X_train, Y_train, X_test, Y_test, K)
-    boxPlot(plotScore)
-
-
+    plotScore = run_all_models(sc, X_train, Y_train, X_test, Y_test, K, all_roc)
+    # run_a_model(X_train, Y_train, X_test, Y_test)
+    # boxPlot(plotScore)
 
 if __name__ == "__main__":
     main()

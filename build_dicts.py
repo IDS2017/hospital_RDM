@@ -4,6 +4,7 @@ import pandas as pd
 
 # 1. read the original data & split into training and target data
 diabetic_data = pd.read_csv('data/diabetic_data.csv').drop('encounter_id', 1)
+diabetic_data = diabetic_data.drop('patient_nbr', 1)
 meta = {'total_instances': diabetic_data.shape[0], 'used_cols': {}}
 
 # 2. device Numerical and Categorical columns
@@ -14,6 +15,7 @@ for col_name in num_data:
 cate_data = diabetic_data.drop(num_data.columns, 1)
 
 # 3. get information from Categorical columns
+total_idx = 0
 for col_name in cate_data.columns:
     meta['used_cols'][col_name] = dict(diabetic_data[col_name].describe())
     meta['used_cols'][col_name]['categories'] = []
@@ -21,21 +23,29 @@ for col_name in cate_data.columns:
     meta['used_cols'][col_name]['cate_idx'] = {}
     idx = 0
     for unique_val in diabetic_data[col_name].unique():
-        if 'diag_' not in col_name:
-            meta['used_cols'][col_name]['categories'].append(str(unique_val))
-            meta['used_cols'][col_name]['cate_cnt'][str(unique_val)] = diabetic_data[col_name].value_counts()[unique_val]
-            meta['used_cols'][col_name]['cate_idx'][str(unique_val)] = idx
-            idx = idx + 1
+        if 'diag_' in col_name or unique_val == 'None':
+            continue
+        meta['used_cols'][col_name]['categories'].append(str(unique_val))
+        meta['used_cols'][col_name]['cate_cnt'][str(unique_val)] = diabetic_data[col_name].value_counts()[unique_val]
+        if '?' in str(unique_val):
+            continue
+        meta['used_cols'][col_name]['cate_idx'][str(unique_val)] = idx
+        idx = idx + 1
+    total_idx = total_idx + idx
 
 # 4. get information from Numerical columns
 for col_name in num_data.columns:
     meta['used_cols'][col_name] = dict(diabetic_data[col_name].describe())
+    total_idx = total_idx + 1
 
 # 5. set information whether the column value is numeric or categorical
 for col_name in diabetic_data.columns:
     cnt_table = diabetic_data[col_name].value_counts()
     if '?' in cnt_table.index:
         meta['used_cols'][col_name]['missing_cnt'] = cnt_table['?']
+        total_idx = total_idx + 1
+    else:
+        meta['used_cols'][col_name]['missing_cnt'] = 0
     if col_name in num_data.columns:
         meta['used_cols'][col_name]['data_type'] = 'numeric'
     else:
@@ -44,6 +54,7 @@ for col_name in diabetic_data.columns:
         meta['used_cols'][col_name]['data_type'] = 'target'
 
 
+#print(total_idx + 37*3)
 #print(meta)
 
 # 6. finally, write meta to a file
@@ -51,13 +62,13 @@ with open('dicts/meta.p', 'wb') as f:
     pk.dump(meta, f, pk.HIGHEST_PROTOCOL)
 
 
-
-def get_ICD(icd_code):
-    icd_code = icd_code.split('.')[0]
-    # icd_code_index = {0:(1,139), 1:(140,239), 2:(240,279), 3:(280,289), 4:(290,319), 5:(320,359),
-    #                  6:(360,389), 7:(390,459), 8:(460,519), 9:(520,579), 10:(580,629),
-    #                  11:(630, 679), 12:(680, 709), 13:(710, 739), 14:(740, 759), 15:(760, 779),
-    #                  16:(780, 799), 17:(800, 999), 18:('E', 'V')}
+def get_ICD(icd_code_original):
+    icd_code = icd_code_original.split('.')[0]
+    icd_code_detail = '-1'
+    is_diabete = 0
+    is_uncontrolled = 0
+    type = 2
+    DIABETE_CODE = '250'
     icd_code_index = [('1', '139'), ('140', '239'), ('240', '279'), ('280', '289'), ('290', '319'),
                       ('320', '359'), ('360', '389'), ('390', '459'), ('460', '519'), ('520', '579'),
                       ('580', '629'), ('630', '679'), ('680', '709'), ('710', '739'), ('740', '759'),
@@ -69,6 +80,23 @@ def get_ICD(icd_code):
         index = 1
     elif icd_code_index[2][0] <= icd_code <= icd_code_index[2][1]:
         index = 2
+        if icd_code == DIABETE_CODE:
+            is_diabete = 1
+            if '.' in icd_code_original:
+                icd_code_detail = icd_code_original.split('.')[1]
+                if len(icd_code_detail) == 2:
+                    if icd_code_detail[1] == '0':
+                        type = 1
+                    elif icd_code_detail[1] == '1':
+                        type = 0
+                    elif icd_code_detail[1] == '2':
+                        type = 1
+                        is_uncontrolled = 1
+                    elif icd_code_detail[1] == '3':
+                        type = 0
+                        is_uncontrolled = 1
+                icd_code_detail = icd_code_detail[0]
+
     elif icd_code_index[3][0] <= icd_code <= icd_code_index[3][1]:
         index = 3
     elif icd_code_index[4][0] <= icd_code <= icd_code_index[4][1]:
@@ -106,9 +134,14 @@ def get_ICD(icd_code):
     else:
         index = 19
 
-    return index
+    return index, is_diabete, type, is_uncontrolled, int(icd_code_detail)
 
 def print_icd_code_index():
-    for value in diabetic_data.diag_1:
+    for value in diabetic_data.diag_2:
+        if value.split('.')[0] == '250':
             print(value, ": ", get_ICD(value))
 
+
+if __name__ == "__main__":
+    # print_icd_code_index()
+    index, is_diabete, which_type, is_uncontrolled, icd_code_detail = get_ICD('250.3')
