@@ -11,7 +11,7 @@ model_list = {
 }
 
 params_list = {
-    "Logistic_Regression": {'max_iter': [100, 500, 1000], 'C': [10**i for i in range(-3,1)]},
+    "Logistic_Regression": {'C': [10**i for i in range(-3,1)]},
     "Random_Forest": {'n_estimators': [50, 100], \
                       'min_samples_split': [10*i for i in range(1,10)], \
                       'max_features': ['auto', 'log2'], \
